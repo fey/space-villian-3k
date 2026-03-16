@@ -1,0 +1,81 @@
+body {
+  background: #0f172a;
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.game {
+  width: 420px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #1e293b;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.entity {
+  flex: 1;
+  background: #111827;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.entity h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #93c5fd;
+}
+
+.stat {
+  font-size: 13px;
+  margin: 2px 0;
+  opacity: 0.9;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+button:hover {
+  background: #3b82f6;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:nth-child(2) {
+  background: #059669;
+}
+
+button:nth-child(2):hover {
+  background: #10b981;
+}
+
+button:nth-child(3) {
+  background: #ca8a04;
+}
+
+button:nth-child(3):hover {
+  background: #eab308;
+}
