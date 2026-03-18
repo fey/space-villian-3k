@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,3 +25,27 @@ jobs:
 
       - name: Type check and build
         run: make build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: make install
+      - run: make build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
