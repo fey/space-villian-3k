@@ -1,6 +1,6 @@
 import createGame from "./game"
 import { h } from "./helpers/html"
-import { subscribe, proxy, snapshot } from "valtio/vanilla"
+import { subscribe, proxy } from "valtio/vanilla"
 
 const gameState = proxy(createGame())
 
@@ -121,7 +121,7 @@ const render = () => {
   renderBattleLog()
 }
 
-export default (container: HTMLElement) => {
+export default () => {
   const attackBtn = document.querySelector<HTMLButtonElement>('#attack')!
   const healBtn = document.querySelector<HTMLButtonElement>('#heal')!
   const chargeBtn = document.querySelector<HTMLButtonElement>('#charge')!
