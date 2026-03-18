@@ -1,4 +1,7 @@
-.PHONY: dev build lint test
+.PHONY: dev build lint test install
+
+install:
+	npm ci
 
 dev:
 	npm run dev
