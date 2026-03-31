@@ -1,156 +1,91 @@
-import createGame from "./game"
-import { h } from "./helpers/html"
-import { subscribe, proxy } from "valtio/vanilla"
+import { subscribe, proxy } from 'valtio/vanilla';
+import { h } from './helpers/html';
+import { createInitialState, createRandomRng, processTurn, type PlayerAction } from './game';
 
-const gameState = proxy(createGame())
-
-const reactVillian = () => {
-  const { player, villian } = gameState;
-
-  const hpPercent = gameState.villian.Health / villian.MaxHealth * 100;
-
-  console.log(hpPercent)
-
-  if (hpPercent < 50) {
-    const inc = 5
-    villian.Health += inc
-
-    gameState.log.push({
-      name: "villian_heal",
-      value: inc
-    })
-
-    return;
-  }
-
-  player.Health -= villian.AttackPower;
-
-  gameState.log.push({
-    name: "villian_attack",
-    value: villian.AttackPower
-  });
-}
-
-const handleAttack = () => {
-  const { player, villian } = gameState
-  villian.Health -= player.AttackPower
-
-  if (villian.Health <= 0) {
-    // won game
-    return;
-  }
-
-  gameState.log.push({
-    name: "player_attack",
-    value: player.AttackPower
-  })
-
-  player.Energy += 1
-  // villian reacts
-}
-
-const handleHeal = () => {
-  const { player } = gameState
-
-  gameState.player.HealPower = Math.min(player.MaxHealth, player.Health + player.HealPower);
-  gameState.player.Energy -= 5
-
-  gameState.log.push({
-    name: "player_heal",
-    value: player.HealPower
-  })
-}
-
-const handleCharge = () => {
-  const { player } = gameState
-
-  const inc = 5
-  player.Energy += inc
-
-  gameState.log.push({
-    name: "player_charge",
-    value: inc
-  });
-}
+const rng = createRandomRng();
+const gameState = proxy(createInitialState());
 
 const renderPlayer = () => {
-  const { player } = gameState
+  const { player } = gameState;
   const playerUI = {
     hp: document.querySelector<HTMLDivElement>('#player-health')!,
     energy: document.querySelector<HTMLDivElement>('#player-energy')!,
-    attack: document.querySelector<HTMLDivElement>('#player-ap')!
-  }
+    attack: document.querySelector<HTMLDivElement>('#player-ap')!,
+  };
 
-  playerUI.hp.innerText = `HP: ${player.Health} / ${player.MaxHealth}`
-  playerUI.energy.innerText = `Energy: ${player.Energy}`
-  playerUI.attack.innerText = `Attack: ${player.AttackPower}`
-}
+  playerUI.hp.innerText = `HP: ${player.hp} / ${player.maxHp}`;
+  playerUI.energy.innerText = `Energy: ${player.energy}`;
+  playerUI.attack.innerText = 'Attack: 4-8';
+};
 
-const renderVillian = () => {
-  const { villian } = gameState
+const renderVillain = () => {
+  const { villain } = gameState;
 
-  const villianUI = {
+  const villainUI = {
     hp: document.querySelector<HTMLDivElement>('#villian-health')!,
     energy: document.querySelector<HTMLDivElement>('#villian-energy')!,
-    attack: document.querySelector<HTMLDivElement>('#villian-ap')!
-  }
+    attack: document.querySelector<HTMLDivElement>('#villian-ap')!,
+  };
 
-  villianUI.hp.innerText = `HP: ${villian.Health} / ${villian.MaxHealth}`
-  villianUI.energy.innerText = `Energy: ${villian.Energy}`
-  villianUI.attack.innerText = `Attack: ${villian.Energy}`
-}
+  villainUI.hp.innerText = `HP: ${villain.hp} / ${villain.maxHp}`;
+  villainUI.energy.innerText = `Energy: ${villain.energy}`;
+  villainUI.attack.innerText = 'Attack: 5-12';
+};
 
 const renderBattleLog = () => {
   const battleLog = document.querySelector<HTMLUListElement>('#log-content')!;
   battleLog.innerHTML = '';
 
-  const { log } = gameState;
-
-  const listItems = log.map((item, i) => {
-    return h('li', null, `${i} - ${item.name}`)
-  }).reverse();
+  const listItems = gameState.log
+    .map((item, i) => h('li', null, `${i + 1}. ${item.message}`))
+    .reverse();
 
   battleLog.append(...listItems);
-}
+};
+
+const renderStatus = () => {
+  const attackBtn = document.querySelector<HTMLButtonElement>('#attack')!;
+  const healBtn = document.querySelector<HTMLButtonElement>('#heal')!;
+  const chargeBtn = document.querySelector<HTMLButtonElement>('#charge')!;
+
+  const ended = gameState.status !== 'playing';
+  attackBtn.disabled = ended;
+  healBtn.disabled = ended;
+  chargeBtn.disabled = ended;
+};
 
 const render = () => {
-  console.log('rendered')
+  renderPlayer();
+  renderVillain();
+  renderBattleLog();
+  renderStatus();
+};
 
-  renderPlayer()
-  renderVillian()
-  renderBattleLog()
-}
+const dispatch = (action: PlayerAction) => {
+  const next = processTurn(gameState, action, rng);
+  Object.assign(gameState, next);
+};
 
 export default () => {
-  const attackBtn = document.querySelector<HTMLButtonElement>('#attack')!
-  const healBtn = document.querySelector<HTMLButtonElement>('#heal')!
-  const chargeBtn = document.querySelector<HTMLButtonElement>('#charge')!
+  const attackBtn = document.querySelector<HTMLButtonElement>('#attack')!;
+  const healBtn = document.querySelector<HTMLButtonElement>('#heal')!;
+  const chargeBtn = document.querySelector<HTMLButtonElement>('#charge')!;
 
   attackBtn.addEventListener('click', (e) => {
     e.preventDefault();
-
-    console.log('attack')
-
-    handleAttack()
-    reactVillian()
+    dispatch({ type: 'PLAYER_ATTACK' });
   });
 
   healBtn.addEventListener('click', (e) => {
     e.preventDefault();
-
-    console.log('heal')
-
-    handleHeal()
-    reactVillian()
+    dispatch({ type: 'PLAYER_HEAL' });
   });
 
   chargeBtn.addEventListener('click', (e) => {
     e.preventDefault();
-
-    handleCharge()
-    reactVillian()
+    dispatch({ type: 'PLAYER_CHARGE' });
   });
 
-  render()
-  subscribe(gameState, render)
+  render();
+  subscribe(gameState, render);
 };
