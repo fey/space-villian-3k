@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest';
+import { createInitialState } from '../src/game';
 
-describe('Smoke Tests', () => {
-  it('should pass basic true check', () => {
-    expect(true).toBe(true)
-  })
-
-  it('should pass another basic check', () => {
-    expect(true).toBeTruthy()
-  })
-})
+describe('smoke', () => {
+  it('initial state created', () => {
+    const state = createInitialState();
+    expect(state.status).toBe('playing');
+    expect(state.player.hp).toBe(100);
+    expect(state.villain.hp).toBe(100);
+  });
+});
